@@ -29,8 +29,8 @@ async def get_all_movies(db: AsyncSession = Depends(get_db),
     movies_pydantic = [MovieDetailResponseSchema.model_validate(movie) for movie in movies]
 
     base_url = "/theater/movies"
-    prev_page = f"{base_url}/?page={page - 1}&per_page={per_page}" if page > 1 else None
-    next_page = f"{base_url}/?page={page + 1}&per_page={per_page}" if page < total_pages else None
+    prev_page = f"{base_url}/?page={page - 1}&per_page={per_page}" if page > 1 else ""
+    next_page = f"{base_url}/?page={page + 1}&per_page={per_page}" if page < total_pages else ""
 
     return MovieListResponseSchema(
         movies=movies_pydantic,
