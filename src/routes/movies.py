@@ -4,12 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from src.database import get_db, MovieModel
-from src.schemas import MovieListResponseSchema, MovieDetailResponseSchema, PaginationMoviesResponse
+from src.schemas import MovieListResponseSchema, MovieDetailResponseSchema
 
 
 router = APIRouter(prefix="/movies")
 
-@router.get("/", response_model=PaginationMoviesResponse)
+
+@router.get("/", response_model=MovieListResponseSchema)
 async def get_all_movies(db: AsyncSession = Depends(get_db),
                          page: int = Query(1, ge=1),
                          per_page: int = Query(10, ge=1, le=20)):
@@ -25,18 +26,20 @@ async def get_all_movies(db: AsyncSession = Depends(get_db),
 
     result = await db.execute(select(MovieModel).offset(offset).limit(per_page))
     movies = result.scalars().all()
-    movies_pydantic = [MovieListResponseSchema.model_validate(movie) for movie in movies]
+    movies_pydantic = [MovieDetailResponseSchema.model_validate(movie) for movie in movies]
 
-    prev_page = page - 1 if page > 1 else None
-    next_page = page + 1 if page < total_pages else None
+    base_url = "/theater/movies"
+    prev_page = f"{base_url}/?page={page - 1}&per_page={per_page}" if page > 1 else None
+    next_page = f"{base_url}/?page={page + 1}&per_page={per_page}" if page < total_pages else None
 
-    return PaginationMoviesResponse(
-        movies = movies_pydantic,
-        prev_page = prev_page,
-        next_page = next_page,
-        total_items = total_items,
-        total_pages = total_pages,
+    return MovieListResponseSchema(
+        movies=movies_pydantic,
+        prev_page=prev_page,
+        next_page=next_page,
+        total_pages=total_pages,
+        total_items=total_items,
     )
+
 
 @router.get("/{id}/", response_model=MovieDetailResponseSchema)
 async def get_one_movie(id: int, db: AsyncSession = Depends(get_db)):

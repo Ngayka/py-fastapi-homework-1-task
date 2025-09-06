@@ -3,10 +3,11 @@ from typing import Optional, List
 from datetime import date
 
 
-class MovieBase(BaseModel):
+class MovieDetailResponseSchema(BaseModel):
+    id: int
     name: str
     date: date
-    score: int
+    score: float
     genre: str
     overview: str
     crew: str
@@ -22,17 +23,10 @@ class MovieBase(BaseModel):
     }
 
 
-class MovieListResponseSchema(MovieBase):
-    pass
-
-
-class MovieDetailResponseSchema(MovieListResponseSchema):
-    id: int
-
-
-class PaginationMoviesResponse(BaseModel):
-    movies: List[MovieBase]
-    prev_page: int | None
-    next_page: int | None
+class MovieListResponseSchema(BaseModel):
+    movies: List[MovieDetailResponseSchema]
+    prev_page: Optional[str]
+    next_page: Optional[str]
+    next_page: str
     total_pages: int
     total_items: int
